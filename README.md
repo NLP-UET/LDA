@@ -21,6 +21,11 @@ python main.py <number_of_topics> <alpha> <beta> <max_iterations>
 - `<beta>`: Dirichlet parameter for topic-word distributions.
 - `<max_iterations>`: Maximum number of iterations for Gibbs sampling.
 
+- Example (In my project): 
+```bash
+python main.py 10 1.0 0.1 100
+```
+
 ## Notes
 - Gibbs sampling can be slow, and checking convergence is challenging.
 - Results may vary due to corpus size and other factors.
