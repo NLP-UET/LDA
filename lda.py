@@ -17,15 +17,14 @@ Gibbs sampling update
 }
 """
 
-np.set_printoptions(threshold='nan')
+np.set_printoptions(threshold=np.inf)
 
 class Document(object):
-
     '''
     Splits a text file into an ordered list of words.
     '''
 
-    # List of punctuation characters to scrub. Omits, the single apostrophe,
+    # List of punctuation characters to scrub. Omits the single apostrophe,
     # which is handled separately so as to retain contractions.
     PUNCTUATION = ['(', ')', ':', ';', ',', '-', '!', '.', '?', '/', '"', '*']
 
@@ -36,17 +35,15 @@ class Document(object):
     # pushed onto the core words list.
     WORD_REGEX = "^[a-z']+$"
 
-
     def __init__(self, filepath):
         '''
         Set source file location, build contractions list, and initialize empty
         lists for lines and words.
         '''
         self.filepath = filepath
-        self.file = open(self.filepath)
+        self.file = open(self.filepath, 'r', encoding='utf-8')
         self.lines = []
         self.words = []
-
 
     def split(self, STOP_WORDS_SET):
         '''
@@ -59,9 +56,8 @@ class Document(object):
             words = line.split(' ')
             for word in words:
                 clean_word = self._clean_word(word)
-                if clean_word and (clean_word not in STOP_WORDS_SET) and (len(clean_word) > 1): # omit stop words
+                if clean_word and (clean_word not in STOP_WORDS_SET) and (len(clean_word) > 1):  # omit stop words
                     self.words.append(clean_word)
-
 
     def _clean_word(self, word):
         '''
@@ -75,9 +71,7 @@ class Document(object):
             word = word.replace(punc, '').strip("'")
         return word if re.match(Document.WORD_REGEX, word) else None
 
-
 class Corpus(object):
-
     '''
     A collection of documents.
     '''
@@ -88,55 +82,47 @@ class Corpus(object):
         '''
         self.documents = []
 
-
     def add_document(self, document):
         '''
         Add a document to the corpus.
         '''
         self.documents.append(document)
 
-
     def build_vocabulary(self):
         '''
         Construct a list of unique words in the corpus.
         '''
-        # ** ADD ** #
-        # exclude words that appear in 90%+ of the documents
-        # exclude words that are too (in)frequent
         discrete_set = set()
         for document in self.documents:
             for word in document.words:
                 discrete_set.add(word)
         self.vocabulary = list(discrete_set)
-        
-
 
     def lda(self, number_of_topics, iterations, alpha, beta):
-
         '''
         Model topics.
         '''
-        print "Gibbs sampling process..."
+        print("Gibbs sampling process...")
         # Get vocabulary and number of documents.
         self.build_vocabulary()
         number_of_documents = len(self.documents)
         vocabulary_size = len(self.vocabulary)
 
         # Create the counter arrays.
-        self.document_topic_counts = np.zeros([number_of_documents, number_of_topics], dtype=np.int)
-        self.topic_word_counts = np.zeros([number_of_topics, len(self.vocabulary)], dtype=np.int)
+        self.document_topic_counts = np.zeros([number_of_documents, number_of_topics], dtype=int)
+        self.topic_word_counts = np.zeros([number_of_topics, len(self.vocabulary)], dtype=int)
         self.current_word_topic_assignments = []
         self.topic_counts = np.zeros(number_of_topics)
 
         # Initialize
-        print "Initializing..."
+        print("Initializing...")
         for d_index, document in enumerate(self.documents):
             word_topic_assignments = []
             for word in document.words:
                 if word in self.vocabulary:
                     # Select random starting topic assignment for word.
                     w_index = self.vocabulary.index(word)
-                    starting_topic_index = np.random.randint(number_of_topics) # randomly assign topic to every word
+                    starting_topic_index = np.random.randint(number_of_topics)  # randomly assign topic to every word
                     word_topic_assignments.append(starting_topic_index)
                     # Set current topic assignment, increment doc-topic and word-topic counters.
                     self.document_topic_counts[d_index, starting_topic_index] += 1
@@ -146,7 +132,7 @@ class Corpus(object):
 
         # Run the sampler.
         for iteration in range(iterations):
-            print "Iteration #" + str(iteration + 1) + "..."
+            print("Iteration #" + str(iteration + 1) + "...")
             for d_index, document in enumerate(self.documents):
                 for w, word in enumerate(document.words):
                     if word in self.vocabulary:
@@ -159,9 +145,8 @@ class Corpus(object):
                         self.topic_counts[current_topic_index] -= 1
                         # Get new topic.
                         topic_distribution = (self.topic_word_counts[:, w_index] + beta) * \
-                            (self.document_topic_counts[d_index] + alpha) / \
-                            (self.topic_counts + beta) # changed by hitalex
-                        #new_topic_index = np.random.multinomial(1, np.random.dirichlet(topic_distribution)).argmax()
+                                             (self.document_topic_counts[d_index] + alpha) / \
+                                             (self.topic_counts + beta)  # changed by hitalex
                         # choose a new topic index according to topic distribution
                         new_topic_index = choose(range(number_of_topics), topic_distribution)
                         # Reassign and notch up counts.
