@@ -42,7 +42,7 @@ def print_document_topic_distribution(corpus, number_of_topics, topk, filepath):
             for i in range(number_of_topics):
                 topic_index_count.append([i, topic_count[i]])
             topic_index_count = sorted(topic_index_count, key=itemgetter(1), reverse=True)
-            f.write("Document #" + str(d) + ":\n")
+            f.write("Document #" + str(d + 1) + ":\n")  # Number documents starting from 1
             for i in range(topk):
                 index = topic_index_count[i][0]
                 f.write("Topic #" + str(index + 1) + " ")  # Number topics starting from 1
@@ -51,7 +51,7 @@ def print_document_topic_distribution(corpus, number_of_topics, topk, filepath):
 def main(argv):
     print("Usage: python ./main.py <number_of_topics> <alpha> <beta> <maxiteration>")
     # load stop words list from file
-    with open("./lda/stopwords.txt", "r") as stopwordsfile:
+    with open("./lda/stopwords/stopwords.txt", "r") as stopwordsfile:
         for word in stopwordsfile:  # a stop word in each line
             word = word.strip()
             STOP_WORDS_SET.add(word)
@@ -75,8 +75,8 @@ def main(argv):
     max_iterations = int(argv[4])
     corpus.lda(number_of_topics, max_iterations, alpha, beta)
 
-    print_topic_word_distribution(corpus, number_of_topics, 20, "./lda/topic-word.txt")
-    print_document_topic_distribution(corpus, number_of_topics, 10, "./lda/document-topic.txt")
+    print_topic_word_distribution(corpus, number_of_topics, 20, "./lda/result/topic-word.txt")
+    print_document_topic_distribution(corpus, number_of_topics, 10, "./lda/result/document-topic.txt")
 
 if __name__ == "__main__":
     main(sys.argv)
