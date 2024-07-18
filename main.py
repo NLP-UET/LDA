@@ -51,14 +51,14 @@ def print_document_topic_distribution(corpus, number_of_topics, topk, filepath):
 def main(argv):
     print("Usage: python ./main.py <number_of_topics> <alpha> <beta> <maxiteration>")
     # load stop words list from file
-    with open("./lda/stopwords/stopwords.txt", "r") as stopwordsfile:
+    with open("./LDA/stopwords/stopwords.txt", "r") as stopwordsfile:
         for word in stopwordsfile:  # a stop word in each line
             word = word.strip()
             STOP_WORDS_SET.add(word)
 
     corpus = lda.Corpus()  # instantiate corpus
     # iterate over the files in the directory.
-    document_paths = ['./lda/texts/grimm_fairy_tales', './texts/tech_blog_posts', './texts/nyt']
+    document_paths = ['./LDA/texts/grimm_fairy_tales', './texts/tech_blog_posts', './texts/nyt']
     for document_path in document_paths:
         for document_file in glob.glob(os.path.join(document_path, '*.txt')):
             document = lda.Document(document_file)  # instantiate document
@@ -75,8 +75,8 @@ def main(argv):
     max_iterations = int(argv[4])
     corpus.lda(number_of_topics, max_iterations, alpha, beta)
 
-    print_topic_word_distribution(corpus, number_of_topics, 20, "./lda/result/topic-word.txt")
-    print_document_topic_distribution(corpus, number_of_topics, 10, "./lda/result/document-topic.txt")
+    print_topic_word_distribution(corpus, number_of_topics, 20, "./LDA/result/topic-word.txt")
+    print_document_topic_distribution(corpus, number_of_topics, 10, "./LDA/result/document-topic.txt")
 
 if __name__ == "__main__":
     main(sys.argv)
